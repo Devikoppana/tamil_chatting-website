@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Tamil Chat</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+    }
+
+    /* Top Navigation */
+    .top-nav {
+      height: 50px;
+      background: linear-gradient(to right, #015f63, #0f0f0f);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+    }
+    .hamburger {
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .top-icons {
+      display: flex;
+      align-items: center;
+      gap: 10px; /* Space between icons */
+    }
+    .profile-btn {
+      margin-left: 15px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      height: 100vh;
+      background: white;
+      border-right: 2px solid #ccc;
+      position: fixed;
+      top: 50px;
+      left: -220px; /* Initially hidden */
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+    .sidebar.show {
+      left: 0; /* Slide in */
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 10px;
+      border: 1px solid #0a325a; /* Add border to the entire list */
+  border-radius: 8px; /* Optional: Add rounded corners */
+  background: #ffffff;
+    }
+    .sidebar ul li {
+      padding: 12px;
+      border:1px solid #0a325a;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      background: linear-gradient(to right, #cadedf, #8accd7);
+    }
+    .sidebar ul li:hover {
+      background: #d1f0f5;
+      border-color: #203030;
+    }
+    .close-btn {
+      width: 100%;
+      text-align: right;
+      background: none;
+      border: none;
+      padding: 10px;
+      font-size: 18px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    /* Chat Layout */
+    .chat-layout {
+      display: flex;
+      flex-direction: column;
+      margin-top: 50px;
+      height: calc(100vh - 100px);
+      width: calc(100% - 250px);
+      margin-right: 250px;
+    }
+     /* Chat Header */
+  .chat-header {
+    background-color: #006666;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 2px solid #004d4d;
+  }
+
+    /* Chat Section */
+    .chat-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      padding: 10px;
+      overflow-y: hidden;
+    }
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 10px;
+      background-color: #f0f8f8;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      border-radius: 15px;
+      background: #f3f3f3;
+      width: fit-content;
+      max-width: 80%;
+    }
+    .system-message {
+    color: gray;
+    font-style: italic;
+    text-align: center;
+    margin: 10px 0;
+}
+
+    .chat-input {
+      padding: 10px;
+      background: #f0f0f0;
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 15px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    .send-btn {
+      padding: 10px 20px;
+      border-radius: 20px;
+      background-color: #007373;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Profile Dropdown */
+.profile-dropdown {
+  position: relative; /* Position relative to the parent container */
+  display: inline-block;
+}
+.profile-btn {
+  font-size: 18px;
+  cursor: pointer;
+}
+.dropdown-content {
+  display: none; /* Initially hidden */
+  position: absolute;
+  right: 0; /* Align to the right of the parent */
+  top: 30px; /* Position below the profile icon */
+  background: rgb(79, 132, 129);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  padding: 5px;
+  z-index: 2000;
+}
+
+.dropdown-content p {
+  margin: 0;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.dropdown-content p:hover {
+  background: #f0f0f0;
+}
+
+.dropdown-content.show {
+  display: block; /* Show the dropdown when the class is toggled */
+}
+/* Profile Popup */
+.profile-popup {
+  display: none; /* Initially hidden */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: linear-gradient(to right, #eefcfc, #abdcdc);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(8, 49, 49, 0.5);
+  z-index: 3000;
+}
+
+.popup-header {
+  background: linear-gradient(to bottom, #308f8f, #030606);
+  color: white;
+  padding: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.popup-header h3 {
+  margin: 0;
+}
+
+.profile-photo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.profile-photo img {
+  width: 100px;
+  height: 100px;
+  border-radius: 20%;
+  cursor: pointer;
+  border: 2px solid white;
+}
+.close-popup {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  position: absolute; /* Position the button absolutely */
+  top: 10px; /* Distance from the top */
+  right: 10px; /* Distance from the right */ 
+}
+
+.popup-body {
+  padding: 20px;
+  margin: 0;
+}
+
+.info-message {
+  background: #ffa200;
+  color: #333;
+  padding: 5px 10px;
+  font-size: 12px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.account-section h4 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #fafafa;
+}
+
+.account-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 0;
+}
+
+.account-options button {
+  padding: 10px;
+  border: 1px solid #aacdcd;
+  border-radius: 5px;
+  background: linear-gradient(to bottom, #ffffff, #f6f7f7);
+  color: #0b0e0e;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  text-align: center;
+}
+
+.account-options button:hover {
+  background: #e6f2f2; /* Lighter hover effect */
+  color: #007373; /* Darker text color on hover */
+}
+@media (max-width: 600px) {
+  .account-options {
+    grid-template-columns: 1fr; /* Single column for smaller screens */
+  }
+}
+.message {
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 15px;
+  background: #f3f3f3;
+  width: fit-content;
+  max-width: 80%;
+}
+
+.message strong {
+  color: #007373; /* Highlight the username */
+}
+
+.message.system {
+  color: green; /* System messages like "has joined the group" */
+  font-style: italic;
+}
+/* Online Panel */
+.online-panel {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: 250px;
+  height: calc(100vh - 50px);
+  background: linear-gradient(to bottom, #eefcfc, #abdcdc);
+  border-left: 2px solid #006666;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.online-header {
+  background: linear-gradient(to bottom, #437b7b, #081717);
+  color: white;
+  padding: 10px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.online-users {
+  padding: 10px;
+}
+
+.online-users h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #007373;
+}
+
+.online-users ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.online-users ul li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 5px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.online-users ul li:hover {
+  background: #d1f0f5;
+}
+
+.online-users ul li img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.online-users ul li span {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+}
+
+.online-users ul li .level {
+  font-size: 12px;
+  color: #007373;
+  font-weight: bold;
+}
+
+    /* FM Station Bar */
+    #fmStationBar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background: linear-gradient(to bottom, #437b7b, #081717);
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      border-top: 2px solid #006666;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Nav -->
+  <header class="top-nav">
+    <div class="hamburger" onclick="toggleSidebar()">☰</div>
+    <div class="logo">🌞World Tamil Chat <span>🦋</span></div>
+    <div class="top-icons">
+      <i class="mail">📩</i>
+      <i class="notif">🔔</i>
+      <!-- Profile Dropdown -->
+      <div class="profile-dropdown">
+        <button class="dropdown-btn" onclick="toggleDropdown()" cursor="pointer">👤</button>
+        <div class="dropdown-content" id="dropdownContent">
+          <p onclick="openProfilePopup()">
+            <i class="fa fa-user-circle" style="color: #1f4a4a; margin-right: 10px;"></i> My Profile</p>
+          <p><i class="fa fa-sign-out-alt" style="color: #1f5959; margin-right: 10px;"></i> Logout</p> 
+        </div>
+    </div>
+  </header>
+    <!-- Profile Popup -->
+<div id="profilePopup" class="profile-popup">
+  <div class="popup-header">
+    <button class="close-popup" onclick="closeProfilePopup()">✖</button>
+    <div class="profile-photo">
+      <label for="profilePhotoInput">
+        <img id="profilePhoto" src="default-profile.png" alt="Profile Photo" />
+      </label>
+      <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;" />
+    </div>
+    <h3 id="profileName">KingKong</h3><!-- Username will be dynamically updated -->
+  </div>
+  <div class="popup-body">
+    <p class="info-message">
+      ⚠️ You are currently logged in as a guest. Click here to register your account to access more features.
+    </p>
+    <div class="account-section">
+      <h4 style="background-color: #030606;">Account</h4>
+      <div class="account-options">
+        <button>📝Edit Info</button>
+        <button>❓Edit About Me</button>
+        <button>manage ignores </button>
+        <button>🔊Sound Settings</button>
+        <button>🎨Theme Settings</button>
+        <button>Private Settings</button>
+        <button>🌐Language / Location</button>
+        <button>🚪logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Left Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <button onclick="toggleSidebar()" class="close-btn">✖</button>
+    <ul>
+      <li>🟢 Online</li>
+      <li>📰 News</li>
+      <li>📱 App</li>
+      <li>📻 Fm</li>
+      <li>🍓 Forum</li>
+      <li>📘 Register/Rules</li>
+      <li>🏆 Toppers</li>
+      <li>❓ Quiz scores</li>
+      <li>➕ More</li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="chat-layout">
+    <div class="chat-header">
+      <h2>Welcome, <span id="usernameDisplay">Guest</span>!</h2>
+    </div>
+    <!-- Chat Section -->
+    <section class="chat-section">
+      <div class="chat-box" id="chat-box"></div>
+      <div id="chatMessages"></div> <!-- Added missing element -->
+      <div class="chat-input">
+        <input type="text" id="messageInput" placeholder="Type something..." />
+        <button id="sendBtn" class="send-btn">Send</button>
+      </div>
+    </section>
+  </main>
+<!-- Online Panel -->
+<aside class="online-panel" id="onlinePanel">
+  <div class="online-header">
+    <h3>🌐 Thamizhini FM</h3>
+  </div>
+  <div class="online-users">
+    <h4>Online </h4>
+    <ul></ul>
+    <h4>Offline</h4>
+    <ul></ul>
+  </div>
+</aside>
+  <!-- FM Station Bar -->
+  <div id="fmStationBar">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="playBtn" style="
+        background-color: white;
+        color: #006666;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        cursor: pointer;
+      ">
+        ▶
+        <span>🎵 Now Playing: Tamil FM 101</span>
+  <audio controls style="height: 25px;">
+    <source src="your-fm-stream-url.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+</div>
+      </button>
+      <div>
+        <div style="font-size: 11px; opacity: 0.7;">Station</div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+          ❤️ <strong>THAMIZHINI FM</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <script>
+    const socket = io(); 
+    withcredentials:true;
+  
+    // Sidebar toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('show');
+    }
+
+    // Profile dropdown toggle
+    function toggleDropdown() {
+      const dropdown = document.getElementById("dropdownContent");
+      dropdown.classList.toggle("show");
+    }
+// Fetch the logged-in user's name and display it
+async function fetchUsername() {
+    try {
+      const response = await fetch("http://127.0.0.1:5001/api/get-username", {
+        method: "GET",
+        credentials: "include", // Include session cookies
+      });
+
+      const result = await response.json();
+      console.log("Fetched username:", result); // Debugging
+
+      if (response.ok) {
+        // Update the username in the chat header
+        document.getElementById("usernameDisplay").textContent = result.username;
+        document.getElementById("profileName").textContent = result.username;
+
+        // Display "User has joined the room" message
+        const chatBox = document.getElementById("chat-box");
+        const joinMessage = document.createElement("div");
+        joinMessage.className = "message system";
+        joinMessage.textContent = `${result.username} has joined the room 🦋`;
+        chatBox.appendChild(joinMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } else {
+        console.error("Failed to fetch username:", result.error);
+      }
+    } catch (err) {
+      console.error("Error fetching username:", err);
+    }
+  }
+  // Call the function when the chatroom loads
+  window.onload = fetchUsername;
+    function openProfilePopup() {
+  const profilePopup = document.getElementById("profilePopup");
+  profilePopup.style.display = "block";
+}
+
+function closeProfilePopup() {
+  const profilePopup = document.getElementById("profilePopup");
+  profilePopup.style.display = "none";
+}
+// Handle profile photo upload
+document.getElementById("profilePhotoInput").addEventListener("change", function (event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById("profilePhoto").src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+    // Close the dropdown if clicked outside
+    window.addEventListener("click", function (event) {
+      const dropdown = document.getElementById("dropdownContent");
+      if (!event.target.matches(".dropdown-btn")) {
+        if (dropdown.classList.contains("show")) {
+          dropdown.classList.remove("show");
+        }
+      }
+    });
+
+    // FM Play Button
+    document.getElementById("playBtn").addEventListener("click", function () {
+      alert("FM Playing Soon 🎶");
+    });
+
+    // Chat functionality
+    const messageInput = document.getElementById("messageInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatBox = document.getElementById("chat-box");
+
+    function sendMessage() {
+      const message = messageInput.value.trim();
+      if (message !== "") {
+        // Emit the message to the server
+        socket.emit("send_message", message);
+
+        // Display the message in the chat box
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "message";
+        messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+        chatBox.appendChild(messageDiv);
+
+        // Scroll to the bottom of the chat box
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Clear the input field
+        messageInput.value = "";
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // Receive messages from the server
+    socket.on("receive_message", function (msg) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = "message";
+      messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
+      chatBox.appendChild(messageDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+    const username = document.getElementById("usernameDisplay").textContent; // Dynamically fetch the username
+    const chatMessages = document.getElementById("chatMessages");
+
+  </script>
+</body>
+</html>

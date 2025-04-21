@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Tamil Chat</title>
+  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #222;
+      color: rgb(37, 35, 35);
+    }
+    .header {
+      background-color: #0a362e;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header img { height: 50px; }
+    .flag { height: 20px; }
+    .container {
+      background: url("background.jpg") no-repeat center center/cover;
+      height: 550px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    h1 {
+      font-size: 32px;
+      margin: 10px 0;
+      color: white;
+    }
+    .buttons { margin-top: 20px; }
+    .button {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 18px;
+      margin: 10px;
+      text-decoration: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .login { background-color: #f1a027; color: white; }
+    .guest { background-color: #23dcd0; color: white; }
+    .register { background-color: #d02323; color: white; }
+    .footer {
+      padding: 20px;
+      background-color: #222;
+      font-size: 14px;
+    }
+    .footer a {
+      color: lightblue;
+      text-decoration: none;
+    }
+    .popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .popup h2 { margin: 0 0 15px; font-size: 22px; }
+    .popup p { font-size: 16px; margin-bottom: 20px; }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      color: red;
+    }
+    .popup form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .popup input, .popup select {
+      padding: 10px;
+      width: 90%;
+      margin: 0 auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .popup button {
+      padding: 10px;
+      background-color: #0a362e;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="logo.png" alt="Tamil Club Chat" />
+    <img class="flag" src="us-flag.png" alt="US Flag" />
+  </div>
+
+  <div class="container">
+    <h1>World Tamil Chat</h1>
+    <p style="color: #ccc;">Join FREE Tamil Chat Rooms, Tamil Chat Online Chat Rooms, Tamil Chat Rooms</p>
+    <div class="buttons">
+      <button class="button login" onclick="openPopup('login-popup')">Login</button>
+      <button class="button guest" onclick="openPopup('guest-popup')">Guest login</button>
+      <button class="button register" onclick="openPopup('register-popup')">Register</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p><a href="#">Connect with Tamil people from all over the world.</a></p>
+    <p><a href="#">2025 © Online Tamil Chatting Room</a> | <a href="#">Terms of use</a> | <a href="#">Privacy policy</a></p>
+  </div>
+
+  <!-- ✅ Login Popup -->
+  <div id="login-popup" class="popup">
+    <span class="close-btn" onclick="closePopup('login-popup')">✖</span>
+    <h2>Login</h2>
+    <form id="login-form">
+      <input type="text" id="login-username" placeholder="Username" required />
+      <input type="password" id="login-password" placeholder="Password" required />
+      <select id="login-gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="number" id="login-age" placeholder="Age" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <!-- ✅ Guest Login Popup -->
+  <div id="guest-popup" class="popup">
+    <span class="close-btn" onclick="closePopup('guest-popup')">✖</span>
+    <h2>Guest Login</h2>
+    <form onsubmit="guestLogin(event)">
+      <input type="text" id="guest-nickname" placeholder="Enter Nickname" required />
+      <select id="guest-gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <button type="submit">Enter as Guest</button>
+    </form>
+  </div>
+
+  <!-- ✅ Register Popup -->
+  <div id="register-popup" class="popup">
+    <span class="close-btn" onclick="closePopup('register-popup')">✖</span>
+    <h2>Register</h2>
+    <form id="register-form">
+      <input type="text" id="reg_name" placeholder="Username" required />
+      <input type="email" id="reg_email" placeholder="Email" required />
+      <input type="password" id="reg_password" placeholder="Password" required />
+      <select id="reg_gender" required>
+        <option value="" disabled selected>Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="number" id="reg_age" placeholder="Age" required />
+      <button type="submit" id="registerBtn">Register</button>
+    </form>
+  </div>
+
+  <!-- ✅ Popup JS -->
+  <script>
+    function openPopup(id) {
+      document.getElementById(id).style.display = "block";
+    }
+    function closePopup(id) {
+      document.getElementById(id).style.display = "none";
+    }
+  </script>
+
+  <!-- ✅ Guest Login Script -->
+  <script>
+    function guestLogin(event) {
+      event.preventDefault();
+      const nickname = document.getElementById("guest-nickname").value;
+      const gender = document.getElementById("guest-gender").value;
+
+      localStorage.setItem("username", nickname || "Guest");
+      localStorage.setItem("gender", gender);
+      localStorage.setItem("age", "N/A");
+      window.location.href = "chat.html";
+    }
+  </script>
+
+  <!-- ✅ Login Script -->
+  <script>
+    document.getElementById("login-form").addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const username = document.getElementById("login-username").value;
+      const password = document.getElementById("login-password").value;
+
+      console.log("Sending login data:", { username, password }); // Debugging
+
+      if (!username || !password) {
+    alert("Username and password are required!");
+    return;
+  }
+
+      try {
+        const response = await fetch("http://127.0.0.1:5001/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+          credentials:"include"
+        });
+
+        const result = await response.json();
+        console.log("Response from server:", result); // Debugging
+
+
+        if (response.ok) {
+          alert("Login successful!");
+          window.location.href = "chat.html";
+        } else {
+          alert("Login failed: " + (result.error || "Unknown error"));
+        }
+      } catch (err) {
+        console.error("error connecting to server:", err);
+        alert("Could not connect to server.");
+      }
+    });
+  </script>
+
+  <!-- ✅ Register Script -->
+<!-- ✅ Register Script -->
+<script>
+  document.getElementById("register-form").addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const name = document.getElementById("reg_name").value.trim();
+    const email = document.getElementById("reg_email").value.trim();
+    const password = document.getElementById("reg_password").value.trim();
+    const gender = document.getElementById("reg_gender").value.trim();
+    const age = (document.getElementById("reg_age").value.trim(),10);
+
+    // Validate all fields
+    if (!name || !email || !password || !gender || !age) {
+      alert("All fields are required!");
+      return;
+    }
+
+    // Prepare payload
+    const payload = { username: name, email, password, gender, age };
+    console.log("Payload being sent:", payload); // Debugging
+
+    try {
+      const response = await fetch("http://127.0.0.1:5001/add_user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      const result = await response.json();
+      console.log("Response from server:", result); // Debugging
+
+      if (response.ok) {
+        alert("Registration successful!");
+        window.location.href = "chat.html";
+      } else {
+        alert("Registration failed: " + (result.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      alert("Could not connect to server.");
+    }
+  });
+</script>
+</body>
+</html>
