@@ -171,7 +171,7 @@
         <option value="Female">Female</option>
         <option value="Other">Other</option>
       </select>
-      <input type="number" id="reg_age" placeholder="Age" required />
+      <input type="number" id="reg_age" placeholder="Age" required min="18" max="100" />
       <button type="submit" id="registerBtn">Register</button>
     </form>
   </div>
@@ -219,7 +219,8 @@
         const response = await fetch("http://127.0.0.1:5001/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ username, password }),
+          credentials:"include"
         });
 
         const result = await response.json();
@@ -239,40 +240,55 @@
     });
   </script>
 
-  <!-- ✅ Register Script -->
-  <script>
-    document.getElementById("register-form").addEventListener("submit", async function (event) {
-      event.preventDefault();
+<!-- ✅ Register Script -->
+<script>
+  document.getElementById("register-form").addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-      const name = document.getElementById("reg_name").value.trim();
-      const email = document.getElementById("reg_email").value.trim();
-      const password = document.getElementById("reg_password").value.trim();
-      const gender = document.getElementById("reg_gender").value.trim();
-      const age = document.getElementById("reg_age").value.trim();
+    const name = document.getElementById("reg_name").value.trim();
+    const email = document.getElementById("reg_email").value.trim();
+    const password = document.getElementById("reg_password").value.trim();
+    const gender = document.getElementById("reg_gender").value.trim();
+    const age = parseInt(document.getElementById("reg_age").value.trim(), 10); // Convert age to a number
 
-      console.log("Sending data for registration:", { name, email, password, gender, age }); // Debugging
+    // Validate all fields
+    if (!name || !email || !password || !gender || isNaN(age)) {
+      alert("All fields are required!");
+      return;
+    }
 
-      try {
-        const response = await fetch("http://127.0.0.1:5001/add_user", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password, gender, age })
-        });
+    // Validate age
+    if (age < 18 || age > 100) {
+      alert("Please enter a valid age between 18 and 100.");
+      return;
+    }
 
-        const result = await response.json();
-        console.log("Response from server:", result); // Debugging
+    // Prepare payload
+    const payload = { name, email, password, gender, age };
+    console.log("Payload being sent:", payload); // Debugging
 
-        if (response.ok) {
-          alert("Registration successful!");
-          window.location.href = "chat.html";
-        } else {
-          alert("Registration failed: " + (result.error || "Unknown error"));
-        }
-      } catch (err) {
-        console.error("Registration error:", err);
-        alert("Could not connect to server.");
+    try {
+      const response = await fetch("http://127.0.0.1:5001/add_user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        credentials: "include"
+      });
+
+      const result = await response.json();
+      console.log("Response from server:", result); // Debugging
+
+      if (response.ok) {
+        alert("Registration successful!");
+        window.location.href = "chat.html";
+      } else {
+        alert("Registration failed: " + (result.error || "Unknown error"));
       }
-    });
-  </script>
+    } catch (err) {
+      console.error("Registration error:", err);
+      alert("Could not connect to server.");
+    }
+  });
+</script>
 </body>
 </html>

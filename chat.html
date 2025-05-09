@@ -1,731 +1,2262 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Tamil Chat</title>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <style>
-    /* Reset & Base */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f5f5f5;
-    }
+<DOCTYPE html>
+  <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>World Tamil Chat</title>
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      />
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+        }
 
-    /* Top Navigation */
-    .top-nav {
-      height: 50px;
-      background: linear-gradient(to right, #015f63, #0f0f0f);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 15px;
-    }
-    .hamburger {
-      font-size: 24px;
-      cursor: pointer;
-    }
-    .logo {
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .top-icons {
-      display: flex;
-      align-items: center;
-      gap: 10px; /* Space between icons */
-    }
-    .profile-btn {
-      margin-left: 15px;
-      cursor: pointer;
-      font-size: 18px;
-    }
+        body {
+          background-color: #f0f2f5;
+          display: flex;
+          flex-direction: column;
+          height: 100vh;
+          overflow: hidden;
+        }
 
-    /* Sidebar */
-    .sidebar {
-      width: 220px;
-      height: 100vh;
-      background: white;
-      border-right: 2px solid #ccc;
-      position: fixed;
-      top: 50px;
-      left: -220px; /* Initially hidden */
-      transition: left 0.3s ease;
-      z-index: 1000;
-    }
-    .sidebar.show {
-      left: 0; /* Slide in */
-    }
-    .sidebar ul {
-      list-style: none;
-      padding: 10px;
-      border: 1px solid #0a325a; /* Add border to the entire list */
-  border-radius: 8px; /* Optional: Add rounded corners */
-  background: #ffffff;
-    }
-    .sidebar ul li {
-      padding: 12px;
-      border:1px solid #0a325a;
-      border-radius: 8px;
-      margin-bottom: 6px;
-      cursor: pointer;
-      background: linear-gradient(to right, #cadedf, #8accd7);
-    }
-    .sidebar ul li:hover {
-      background: #d1f0f5;
-      border-color: #203030;
-    }
-    .close-btn {
-      width: 100%;
-      text-align: right;
-      background: none;
-      border: none;
-      padding: 10px;
-      font-size: 18px;
-      cursor: pointer;
-      color: #333;
-    }
+        .top-nav {
+          background: linear-gradient(to right, #006666, #003333);
+          color: white;
+          padding: 10px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          position: fixed;
+          width: 100%;
+          z-index: 1000;
+        }
 
-    /* Chat Layout */
-    .chat-layout {
-      display: flex;
-      flex-direction: column;
-      margin-top: 50px;
-      height: calc(100vh - 100px);
-      width: calc(100% - 250px);
-      margin-right: 250px;
-    }
-     /* Chat Header */
-  .chat-header {
-    background-color: #006666;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    font-size: 18px;
-    font-weight: bold;
-    border-bottom: 2px solid #004d4d;
-  }
+        .hamburger {
+          font-size: 24px;
+          cursor: pointer;
+        }
 
-    /* Chat Section */
-    .chat-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: white;
-      padding: 10px;
-      overflow-y: hidden;
-    }
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 10px;
-      background-color: #f0f8f8;
-    }
-    .message {
-      margin-bottom: 10px;
-      padding: 5px 10px;
-      border-radius: 15px;
-      background: #f3f3f3;
-      width: fit-content;
-      max-width: 80%;
-    }
-    .system-message {
-    color: gray;
-    font-style: italic;
-    text-align: center;
-    margin: 10px 0;
-}
+        .logo {
+          font-size: 20px;
+          font-weight: bold;
+        }
 
-    .chat-input {
-      padding: 10px;
-      background: #f0f0f0;
-      display: flex;
-      gap: 10px;
-    }
-    .chat-input input {
-      flex: 1;
-      padding: 15px;
-      border-radius: 20px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
-    .send-btn {
-      padding: 10px 20px;
-      border-radius: 20px;
-      background-color: #007373;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+        .logo span {
+          font-size: 16px;
+        }
 
-    /* Profile Dropdown */
-.profile-dropdown {
-  position: relative; /* Position relative to the parent container */
-  display: inline-block;
-}
-.profile-btn {
-  font-size: 18px;
-  cursor: pointer;
-}
-.dropdown-content {
-  display: none; /* Initially hidden */
-  position: absolute;
-  right: 0; /* Align to the right of the parent */
-  top: 30px; /* Position below the profile icon */
-  background: rgb(79, 132, 129);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 5px;
-  padding: 5px;
-  z-index: 2000;
-}
+        .top-icons i {
+          margin-left: 15px;
+          font-size: 20px;
+          cursor: pointer;
+        }
 
-.dropdown-content p {
-  margin: 0;
-  padding: 5px;
-  cursor: pointer;
-}
+        .profile-dropdown {
+          position: relative;
+          display: inline-block;
+        }
 
-.dropdown-content p:hover {
-  background: #f0f0f0;
-}
+        .dropdown-btn {
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: white;
+          cursor: pointer;
+        }
 
-.dropdown-content.show {
-  display: block; /* Show the dropdown when the class is toggled */
-}
-/* Profile Popup */
-.profile-popup {
-  display: none; /* Initially hidden */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 400px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: linear-gradient(to right, #eefcfc, #abdcdc);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(8, 49, 49, 0.5);
-  z-index: 3000;
-}
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          right: 0;
+          background-color: white;
+          min-width: 150px;
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+          z-index: 1;
+          border-radius: 5px;
+        }
 
-.popup-header {
-  background: linear-gradient(to bottom, #308f8f, #030606);
-  color: white;
-  padding: 70px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+        .dropdown-content p {
+          color: black;
+          padding: 10px;
+          margin: 0;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+        }
 
-.popup-header h3 {
-  margin: 0;
-}
+        .dropdown-content p:hover {
+          background-color: #f1f1f1;
+        }
 
-.profile-photo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+        .dropdown-content.show {
+          display: block;
+        }
 
-.profile-photo img {
-  width: 100px;
-  height: 100px;
-  border-radius: 20%;
-  cursor: pointer;
-  border: 2px solid white;
-}
-.close-popup {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-  position: absolute; /* Position the button absolutely */
-  top: 10px; /* Distance from the top */
-  right: 10px; /* Distance from the right */ 
-}
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: -250px;
+          width: 250px;
+          height: 100%;
+          background-color: #003333;
+          color: white;
+          transition: left 0.3s ease;
+          z-index: 999;
+          padding-top: 60px;
+        }
 
-.popup-body {
-  padding: 20px;
-  margin: 0;
-}
+        .sidebar.show {
+          left: 0;
+        }
 
-.info-message {
-  background: #ffa200;
-  color: #333;
-  padding: 5px 10px;
-  font-size: 12px;
-  margin-bottom: 5px;
-  text-align: center;
-}
+        .sidebar .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 20px;
+          cursor: pointer;
+        }
 
-.account-section h4 {
-  margin-bottom: 10px;
-  font-size: 16px;
-  color: #fafafa;
-}
+        .sidebar ul {
+          list-style: none;
+          padding: 20px;
+        }
 
-.account-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 0;
-}
+        .sidebar ul li {
+          padding: 15px;
+          font-size: 16px;
+          cursor: pointer;
+          border-radius: 4px;
+          transition: background-color 0.3s;
+        }
 
-.account-options button {
-  padding: 10px;
-  border: 1px solid #aacdcd;
-  border-radius: 5px;
-  background: linear-gradient(to bottom, #ffffff, #f6f7f7);
-  color: #0b0e0e;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  text-align: center;
-}
+        .sidebar ul li:hover {
+          background-color: #006666;
+        }
 
-.account-options button:hover {
-  background: #e6f2f2; /* Lighter hover effect */
-  color: #007373; /* Darker text color on hover */
-}
-@media (max-width: 600px) {
-  .account-options {
-    grid-template-columns: 1fr; /* Single column for smaller screens */
-  }
-}
-.message {
-  margin-bottom: 10px;
-  padding: 5px 10px;
-  border-radius: 15px;
-  background: #f3f3f3;
-  width: fit-content;
-  max-width: 80%;
-}
+        .dropdown {
+          position: relative;
+        }
 
-.message strong {
-  color: #007373; /* Highlight the username */
-}
+        .sidebar .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #333;
+          min-width: 150px;
+          z-index: 1;
+          left: 100%;
+          top: 0;
+          border-radius: 4px;
+        }
 
-.message.system {
-  color: green; /* System messages like "has joined the group" */
-  font-style: italic;
-}
-/* Online Panel */
-.online-panel {
-  position: fixed;
-  top: 50px;
-  right: 0;
-  width: 250px;
-  height: calc(100vh - 50px);
-  background: linear-gradient(to bottom, #eefcfc, #abdcdc);
-  border-left: 2px solid #006666;
-  overflow-y: auto;
-  z-index: 1000;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-}
+        .sidebar .dropdown-content button {
+          color: #fff;
+          padding: 10px;
+          text-align: left;
+          background: none;
+          border: none;
+          width: 100%;
+          cursor: pointer;
+        }
 
-.online-header {
-  background: linear-gradient(to bottom, #437b7b, #081717);
-  color: white;
-  padding: 10px;
-  text-align: center;
-  font-size: 16px;
-  font-weight: bold;
-}
+        .sidebar .dropdown-content button:hover {
+          background-color: #555;
+        }
 
-.online-users {
-  padding: 10px;
-}
+        .dropdown:hover .dropdown-content {
+          display: block;
+        }
 
-.online-users h4 {
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #007373;
-}
+        .chat-layout {
+          display: flex;
+          flex: 1;
+          margin-top: 60px;
+          height: calc(100vh - 60px);
+          justify-content: flex-start;
+        }
 
-.online-users ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+        .chat-section {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          padding: 20px;
+          background-color: white;
+          align-items: flex-start;
+        }
 
-.online-users ul li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  margin-bottom: 5px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  transition: background 0.3s ease;
-}
+        .chat-header {
+          padding: 10px 0;
+          width: 100%;
+          text-align: left;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
 
-.online-users ul li:hover {
-  background: #d1f0f5;
-}
+        .chat-header h2 {
+          font-size: 20px;
+          color: #003333;
+        }
 
-.online-users ul li img {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px;
-}
+        .chat-header .server-time {
+          font-size: 14px;
+          color: #666;
+        }
 
-.online-users ul li span {
-  flex: 1;
-  font-size: 14px;
-  color: #333;
-}
+        .chat-box {
+          flex: 1;
+          overflow-y: auto;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          margin-bottom: 10px;
+          background-color: #f9f9f9;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          text-align: left;
+          width: 100%;
+        }
 
-.online-users ul li .level {
-  font-size: 12px;
-  color: #007373;
-  font-weight: bold;
-}
+        .chat-box .message {
+          display: flex;
+          flex-direction: row;
+          align-items: flex-start;
+          justify-content: flex-start;
+          margin-bottom: 10px;
+          width: 100%;
+          margin-left: 0;
+          align-self: flex-start;
+        }
 
-    /* FM Station Bar */
-    #fmStationBar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 15px;
-      background: linear-gradient(to bottom, #437b7b, #081717);
-      color: white;
-      font-family: Arial, sans-serif;
-      font-size: 14px;
-      border-top: 2px solid #006666;
-    }
-  </style>
-</head>
-<body>
-  <!-- Top Nav -->
-  <header class="top-nav">
-    <div class="hamburger" onclick="toggleSidebar()">☰</div>
-    <div class="logo">🌞World Tamil Chat <span>🦋</span></div>
-    <div class="top-icons">
-      <i class="mail">📩</i>
-      <i class="notif">🔔</i>
-      <!-- Profile Dropdown -->
-      <div class="profile-dropdown">
-        <button class="dropdown-btn" onclick="toggleDropdown()" cursor="pointer">👤</button>
-        <div class="dropdown-content" id="dropdownContent">
-          <p onclick="openProfilePopup()">
-            <i class="fa fa-user-circle" style="color: #1f4a4a; margin-right: 10px;"></i> My Profile</p>
-          <p><i class="fa fa-sign-out-alt" style="color: #1f5959; margin-right: 10px;"></i> Logout</p> 
+        .chat-box .message.system {
+          color: #666;
+          font-style: italic;
+          text-align: center;
+          width: 100%;
+        }
+
+        .message .profile-photo {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+
+        .message-content {
+          padding: 8px 12px;
+          border-radius: 10px;
+          max-width: 70%;
+          position: relative;
+        }
+
+        .sent .message-content {
+          background-color: #d4edda;
+          border: 1px solid #c3e6cb;
+        }
+
+        .received .message-content {
+          background-color: #e0f7fa;
+          border: 1px solid #b2ebf2;
+        }
+
+        .message-content strong {
+          color: #003333;
+        }
+
+        .message-time {
+          font-size: 10px;
+          color: #666;
+          margin-left: 10px;
+        }
+
+        .read-receipt {
+          font-size: 12px;
+          color: #666;
+          margin-left: 5px;
+        }
+
+        .read-receipt.read {
+          color: #006666;
+        }
+
+        .chat-input {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 10px;
+          width: 100%;
+        }
+
+        .chat-input input {
+          flex: 1;
+          padding: 10px;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 14px;
+        }
+
+        .send-btn {
+          background-color: #006666;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .send-btn:hover {
+          background-color: #003333;
+        }
+
+        .online-panel {
+          width: 300px;
+          background-color: #e6f7fa;
+          border-left: 1px solid #ddd;
+          display: none;
+          flex-direction: column;
+        }
+
+        .online-panel.show {
+          display: flex;
+        }
+
+        @media (max-width: 768px) {
+          .online-panel.show {
+            position: fixed;
+            top: 60px;
+            right: 0;
+            height: calc(100vh - 60px);
+            z-index: 998;
+          }
+
+          .chat-section {
+            padding: 10px;
+          }
+
+          .chat-box {
+            padding: 5px;
+          }
+
+          .message-content {
+            max-width: 85%;
+          }
+        }
+
+        .online-header {
+          background-color: #006666;
+          color: white;
+          padding: 15px;
+          text-align: center;
+        }
+
+        .online-header h3 {
+          font-size: 18px;
+        }
+
+        .online-users {
+          padding: 15px;
+          flex: 1;
+          overflow-y: auto;
+        }
+
+        .online-users h4 {
+          margin: 10px 0;
+          color: #003333;
+        }
+
+        .online-users ul {
+          list-style: none;
+        }
+
+        .online-users ul li {
+          display: flex;
+          align-items: center;
+          padding: 10px 0;
+        }
+
+        .online-users ul li img {
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          margin-right: 10px;
+        }
+
+        .online-users ul li span {
+          flex: 1;
+        }
+
+        .online-users ul li .level {
+          font-size: 12px;
+          color: #666;
+        }
+
+        #fmStationBar {
+          background-color: #006666;
+          color: white;
+          padding: 10px;
+          border-radius: 5px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          margin-bottom: 10px;
+        }
+
+        .fm-hamburger {
+          font-size: 20px;
+          cursor: pointer;
+        }
+
+        .profile-popup {
+          display: none;
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 400px;
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          z-index: 1001;
+        }
+
+        .popup-header {
+          background-color: #006666;
+          color: white;
+          padding: 15px;
+          border-top-left-radius: 10px;
+          border-top-right-radius: 10px;
+          position: relative;
+          text-align: center;
+        }
+
+        .popup-header .close-popup {
+          position: absolute;
+          right: 15px;
+          top: 15px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .profile-photo {
+          margin: 0 auto;
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          overflow: hidden;
+          cursor: pointer;
+        }
+
+        .profile-photo img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .popup-header h3 {
+          margin-top: 10px;
+          font-size: 18px;
+        }
+
+        .popup-body {
+          padding: 20px;
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .info-message {
+          background-color: #ffcc00;
+          color: black;
+          padding: 10px;
+          border-radius: 5px;
+          margin-bottom: 15px;
+          font-size: 14px;
+        }
+
+        .account-section h4 {
+          background-color: #003333;
+          color: white;
+          padding: 10px;
+          border-radius: 5px;
+          margin-bottom: 10px;
+        }
+
+        .account-options {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+
+        .account-options button {
+          background-color: #f0f2f5;
+          border: 1px solid #ddd;
+          padding: 10px;
+          border-radius: 5px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          font-size: 14px;
+        }
+
+        .account-options button:hover {
+          background-color: #e0e0e0;
+        }
+
+        .modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          justify-content: center;
+          align-items: center;
+          z-index: 1002;
+        }
+
+        .modal-content {
+          background-color: white;
+          border-radius: 10px;
+          width: 80%;
+          max-width: 500px;
+          max-height: 80vh;
+          overflow-y: auto;
+          position: relative;
+        }
+
+        .modal-header {
+          background-color: #006666;
+          color: white;
+          padding: 15px;
+          border-top-left-radius: 10px;
+          border-top-right-radius: 10px;
+          position: relative;
+        }
+
+        .modal-header .close-modal {
+          position: absolute;
+          right: 15px;
+          top: 15px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .modal-body {
+          padding: 20px;
+        }
+
+        .overlay {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 998;
+        }
+
+        /* Settings Modal Styles */
+        .settings-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.7);
+          z-index: 1002;
+          display: none;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .settings-modal-content {
+          width: 90%;
+          max-width: 400px;
+          background-color: #121212;
+          border-radius: 10px;
+          overflow: hidden;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+          position: relative;
+        }
+
+        .settings-modal-header {
+          background: linear-gradient(to right, #8a2be2, #4b0082);
+          padding: 15px;
+          position: relative;
+        }
+
+        .close-settings-modal {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+        }
+
+        .settings-modal-body {
+          padding: 20px;
+          color: white;
+        }
+
+        .settings-form .form-group {
+          margin-bottom: 15px;
+        }
+
+        .settings-form label {
+          display: block;
+          margin-bottom: 5px;
+          font-weight: 500;
+        }
+
+        .settings-form .form-control {
+          width: 100%;
+          padding: 10px;
+          border-radius: 5px;
+          border: none;
+          background-color: #f5f5f5;
+          color: #000;
+        }
+
+        .settings-form textarea.form-control {
+          resize: vertical;
+          min-height: 100px;
+        }
+
+        .form-row {
+          display: flex;
+          margin: 0 -10px;
+        }
+
+        .form-row .form-group {
+          flex: 1;
+          padding: 0 10px;
+        }
+
+        .form-actions {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 20px;
+        }
+
+        .save-btn,
+        .cancel-btn {
+          padding: 10px 20px;
+          border-radius: 5px;
+          border: none;
+          cursor: pointer;
+          font-weight: 500;
+        }
+
+        .save-btn {
+          background-color: #00bcd4;
+          color: white;
+        }
+
+        .cancel-btn {
+          background-color: #757575;
+          color: white;
+        }
+
+        .save-btn i,
+        .cancel-btn i {
+          margin-right: 5px;
+        }
+
+        /* Toggle Switch */
+        .toggle-option {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 50px;
+          height: 24px;
+        }
+
+        .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+        }
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          transition: 0.4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 16px;
+          width: 16px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          transition: 0.4s;
+        }
+
+        input:checked + .slider {
+          background-color: #00bcd4;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #00bcd4;
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(26px);
+        }
+
+        .slider.round {
+          border-radius: 24px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
+        /* Ignore List Empty */
+        .ignore-list-empty {
+          text-align: center;
+          padding: 30px 0;
+        }
+
+        .ignore-list-empty img {
+          width: 60px;
+          margin-bottom: 10px;
+        }
+
+        .ignore-list-empty p {
+          color: #888;
+          font-size: 14px;
+        }
+
+        /* Guest Message */
+        .guest-message {
+          background-color: #ff9800;
+          color: #000;
+          padding: 10px 15px;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+        }
+
+        .guest-message i {
+          margin-right: 8px;
+          font-size: 14px;
+        }
+
+        /* Account Options List */
+        .account-options-list {
+          border-radius: 5px;
+          overflow: hidden;
+        }
+
+        .account-option {
+          display: flex;
+          align-items: center;
+          padding: 12px 15px;
+          border-bottom: 1px solid #2a2a2a;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .account-option:last-child {
+          border-bottom: none;
+        }
+
+        .account-option:hover {
+          background-color: #2a2a2a;
+        }
+
+        .account-option i {
+          margin-right: 12px;
+          width: 20px;
+          text-align: center;
+          color: #8a2be2;
+        }
+
+        /* Emoji picker styles */
+        .emoji-picker {
+          display: none;
+          position: absolute;
+          bottom: 50px;
+          right: 10px;
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+          padding: 10px;
+          max-width: 300px;
+          z-index: 1000;
+        }
+
+        .emoji-picker .emoji-grid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 5px;
+        }
+
+        .emoji-picker .emoji {
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+
+        .emoji-picker .emoji:hover {
+          background-color: #f0f2f5;
+        }
+
+        /* Add additional styles for chat functionality */
+        .chat-actions {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 10px;
+          position: relative;
+        }
+
+        .action-btn {
+          background: none;
+          border: none;
+          font-size: 18px;
+          color: #006666;
+          cursor: pointer;
+        }
+
+        .action-btn:hover {
+          color: #003333;
+        }
+
+        .emoji-btn {
+          position: relative;
+        }
+
+        /* FM station styles */
+        .fm-station-info {
+          display: flex;
+          align-items: center;
+          flex: 1;
+        }
+
+        .fm-controls {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .fm-controls button {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 16px;
+          cursor: pointer;
+        }
+
+        .fm-now-playing {
+          margin-left: 15px;
+          font-size: 14px;
+        }
+
+        /* Status indicator */
+        .status-indicator {
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          margin-right: 5px;
+        }
+
+        .status-online {
+          background-color: #28a745;
+        }
+
+        .status-offline {
+          background-color: #dc3545;
+        }
+
+        .status-away {
+          background-color: #ffc107;
+        }
+      </style>
+    </head>
+
+    <body>
+      <!-- Top Navigation Bar -->
+      <div class="top-nav">
+        <div class="hamburger" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
         </div>
-    </div>
-  </header>
-    <!-- Profile Popup -->
-<div id="profilePopup" class="profile-popup">
-  <div class="popup-header">
-    <button class="close-popup" onclick="closeProfilePopup()">✖</button>
-    <div class="profile-photo">
-      <label for="profilePhotoInput">
-        <img id="profilePhoto" src="default-profile.png" alt="Profile Photo" />
-      </label>
-      <input type="file" id="profilePhotoInput" accept="image/*" style="display: none;" />
-    </div>
-    <h3 id="profileName">username</h3><!-- Username will be dynamically updated -->
-  </div>
-  <div class="popup-body">
-    <p class="info-message">
-      ⚠️ You are currently logged in as a guest. Click here to register your account to access more features.
-    </p>
-    <div class="account-section">
-      <h4 style="background-color: #030606;">Account</h4>
-      <div class="account-options">
-        <button>📝Edit Info</button>
-        <button>❓Edit About Me</button>
-        <button>manage ignores </button>
-        <button>🔊Sound Settings</button>
-        <button>🎨Theme Settings</button>
-        <button>Private Settings</button>
-        <button>🌐Language / Location</button>
-        <button>🚪logout</button>
-      </div>
-    </div>
-  </div>
-</div>
-  <!-- Left Sidebar -->
-  <aside class="sidebar" id="sidebar">
-    <button onclick="toggleSidebar()" class="close-btn">✖</button>
-    <ul>
-      <li>🟢 Online</li>
-      <li>📰 News</li>
-      <li>📱 App</li>
-      <li>📻 Fm</li>
-      <li>🍓 Forum</li>
-      <li>📘 Register/Rules</li>
-      <li>🏆 Toppers</li>
-      <li>❓ Quiz scores</li>
-      <li>➕ More</li>
-    </ul>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="chat-layout">
-    <div class="chat-header">
-      <h2>Welcome, <span id="usernameDisplay">Guest</span>!</h2>
-    </div>
-    <!-- Chat Section -->
-    <section class="chat-section">
-      <div class="chat-box" id="chat-box"></div>
-      <div id="chatMessages"></div> <!-- Added missing element -->
-      <div class="chat-input">
-        <input type="text" id="messageInput" placeholder="Type something..." />
-        <button id="sendBtn" class="send-btn">Send</button>
-      </div>
-    </section>
-  </main>
-<!-- Online Panel -->
-<aside class="online-panel" id="onlinePanel">
-  <div class="online-header">
-    <h3>🌐 Thamizhini FM</h3>
-  </div>
-  <div class="online-users">
-    <h4>Online </h4>
-    <ul></ul>
-    <h4>Offline</h4>
-    <ul></ul>
-  </div>
-</aside>
-  <!-- FM Station Bar -->
-  <div id="fmStationBar">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <button id="playBtn" style="
-        background-color: white;
-        color: #006666;
-        border: none;
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        cursor: pointer;
-      ">
-        ▶
-      </button>
-      <div>
-        <div style="font-size: 11px; opacity: 0.7;">Station</div>
-        <div style="display: flex; align-items: center; gap: 5px;">
-          ❤️ <strong>THAMIZHINI FM</strong>
+        <div class="logo">World Tamil Chat <span>v1.0</span></div>
+        <div class="top-icons">
+          <i class="fas fa-users" onclick="toggleOnlinePanel()"></i>
+          <i class="fas fa-bell"></i>
+          <div class="profile-dropdown">
+            <button class="dropdown-btn" onclick="toggleProfileDropdown()">
+              <i class="fas fa-user-circle"></i>
+            </button>
+            <div id="profileDropdown" class="dropdown-content">
+              <p onclick="openProfilePopup()">
+                <i class="fas fa-user-cog"></i> &nbsp; Profile
+              </p>
+              <p><i class="fas fa-cog"></i> &nbsp; Settings</p>
+              <p onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> &nbsp; Logout
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-  <script>
-    const socket = io(); 
-    withcredentials:true;
-  
-    // Sidebar toggle
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('show');
-    }
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <button class="close-btn" onclick="toggleSidebar()">
+          <i class="fas fa-times"></i>
+        </button>
+        <ul>
+          <li><i class="fas fa-home"></i> &nbsp; Main Lobby</li>
+          <li><i class="fas fa-comments"></i> &nbsp; Public Chat</li>
+          <li><i class="fas fa-user-friends"></i> &nbsp; Private Chat</li>
+          <li class="dropdown">
+            <i class="fas fa-globe"></i> &nbsp; Tamil Rooms
+            <div class="dropdown-content">
+              <button>Tamil General</button>
+              <button>Tamil Music</button>
+              <button>Tamil Cinema</button>
+              <button>Tamil Culture</button>
+            </div>
+          </li>
+          <li><i class="fas fa-headphones"></i> &nbsp; Thamizhini FM</li>
+          <li><i class="fas fa-cog"></i> &nbsp; Settings</li>
+          <li><i class="fas fa-question-circle"></i> &nbsp; Help</li>
+        </ul>
+      </div>
 
-    // Profile dropdown toggle
-    function toggleDropdown() {
-      const dropdown = document.getElementById("dropdownContent");
-      dropdown.classList.toggle("show");
-    }
-// Fetch the logged-in user's name and display it
-async function fetchUsername() {
-    try {
-      const response = await fetch("http://127.0.0.1:5001/api/get-username", {
-        method: "GET",
-        credentials: "include", // Include session cookies
-      });
+      <!-- Main Chat Layout -->
+      <div class="chat-layout">
+        <div class="chat-section">
+          <!-- Removed FM Station Bar from here - it will be moved below the send button -->
 
-      const result = await response.json();
-      console.log("Fetched username:", result); // Debugging
+          <!-- Chat Header -->
+          <div class="chat-header">
+            <h2><i class="fas fa-comments"></i> Tamil General Chat Room</h2>
+            <div class="server-time" id="serverTime">Server Time: 00:00:00</div>
+          </div>
 
-      if (response.ok) {
-        // Update the username in the chat header
-        document.getElementById("usernameDisplay").textContent = result.username;
+          <!-- Chat Box -->
+          <div class="chat-box" id="chatBox">
+            <!-- System Message -->
+            <div class="message system">
+              Welcome to the Tamil Chat Room! Please follow the community
+              guidelines.
+            </div>
 
-        // Display "User has joined the room" message
-        const chatBox = document.getElementById("chat-box");
-        const joinMessage = document.createElement("div");
-        joinMessage.className = "message system";
-        joinMessage.textContent = `${result.username} has joined the room 🦋`;
-        chatBox.appendChild(joinMessage);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } else {
-        console.error("Failed to fetch username:", result.error);
-      }
-    } catch (err) {
-      console.error("Error fetching username:", err);
-    }
-  }
-  // Call the function when the chatroom loads
-  window.onload = fetchUsername;
-    function openProfilePopup() {
-  const profilePopup = document.getElementById("profilePopup");
-  profilePopup.style.display = "block";
-}
+            <!-- Sample Messages -->
+            <!-- Will be populated with JavaScript -->
+          </div>
 
-function closeProfilePopup() {
-  const profilePopup = document.getElementById("profilePopup");
-  profilePopup.style.display = "none";
-}
-// Handle profile photo upload
-document.getElementById("profilePhotoInput").addEventListener("change", function (event) {
-  const file = event.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      document.getElementById("profilePhoto").src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-});
-    // Close the dropdown if clicked outside
-    window.addEventListener("click", function (event) {
-      const dropdown = document.getElementById("dropdownContent");
-      if (!event.target.matches(".dropdown-btn")) {
-        if (dropdown.classList.contains("show")) {
+          <!-- Chat Actions -->
+          <div class="chat-actions">
+            <button class="action-btn emoji-btn" onclick="toggleEmojiPicker()">
+              <i class="far fa-smile"></i>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-paperclip"></i>
+            </button>
+            <button class="action-btn">
+              <i class="fas fa-image"></i>
+            </button>
+            <div class="emoji-picker" id="emojiPicker">
+              <div class="emoji-grid"></div>
+            </div>
+          </div>
+
+          <!-- Chat Input -->
+          <div class="chat-input">
+            <input
+              type="text"
+              id="messageInput"
+              placeholder="Type your message here..."
+              onkeypress="if(event.keyCode === 13) sendMessage()"
+            />
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+            <button class="menu-btn" onclick="toggleOnlinePanel()">
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
+
+          <!-- FM Station Bar - moved below the send button -->
+          <div id="fmStationBar">
+            <div class="fm-station-info">
+              <div class="fm-hamburger">
+                <i class="fas fa-broadcast-tower"></i>
+              </div>
+              <div class="fm-now-playing">
+                Thamizhini FM - Now Playing: Tamil Top Hits
+              </div>
+            </div>
+            <div class="fm-controls">
+              <button id="playPauseBtn"><i class="fas fa-play"></i></button>
+              <button><i class="fas fa-volume-up"></i></button>
+            </div>
+          </div>
+
+          <style>
+            #fmStationBar {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              background-color: rgba(0, 0, 0, 0.7);
+              padding: 8px 15px;
+              margin-top: 10px;
+              border-radius: 5px;
+              font-size: 14px;
+              color: white;
+            }
+
+            .menu-btn {
+              background-color: #006666;
+              color: white;
+              border: none;
+              padding: 10px 15px;
+              border-radius: 5px;
+              cursor: pointer;
+              margin-left: 5px;
+            }
+
+            .menu-btn:hover {
+              background-color: #003333;
+            }
+          </style>
+        </div>
+
+        <!-- Online Users Panel -->
+        <div class="online-panel" id="onlinePanel">
+          <div class="online-header">
+            <h3><i class="fas fa-users"></i> Online Users</h3>
+            <button class="close-online-panel" onclick="toggleOnlinePanel()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <style>
+            .online-header {
+              position: relative;
+            }
+
+            .close-online-panel {
+              position: absolute;
+              top: 15px;
+              right: 15px;
+              background: none;
+              border: none;
+              color: white;
+              font-size: 16px;
+              cursor: pointer;
+            }
+          </style>
+          <div class="online-users">
+            <h4>Admins (2)</h4>
+            <ul id="adminList">
+              <li>
+                <img src="default-profile.png" alt="Admin" />
+                <span>TamilAdmin</span>
+                <span class="level">Admin</span>
+              </li>
+              <li>
+                <img src="default-profile.png" alt="Moderator" />
+                <span>ModeratorTamil</span>
+                <span class="level">Mod</span>
+              </li>
+            </ul>
+
+            <h4>Users Online (0)</h4>
+            <ul id="onlineUsersList">
+              <!-- Will be populated with JavaScript -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overlay -->
+      <div class="overlay" id="overlay" onclick="closeAllPopups()"></div>
+
+      <!-- Profile Popup -->
+      <div class="profile-popup" id="profilePopup">
+        <div class="popup-header">
+          <button class="close-popup" onclick="closeProfilePopup()">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="profile-photo">
+            <img
+              id="profileImage"
+              src="default-profile.png"
+              alt="Profile Photo"
+              onclick="document.getElementById('profilePictureInput').click()"
+            />
+            <input
+              type="file"
+              id="profilePictureInput"
+              style="display: none"
+              accept="image/*"
+              onchange="updateProfilePicture(this)"
+            />
+          </div>
+          <h3 id="profileName">User Profile</h3>
+        </div>
+
+        <!-- Guest User Message -->
+        <div class="guest-message">
+          <i class="fas fa-exclamation-circle"></i> You are currently logged in
+          as guest. Click here to register your account in order to access more
+          features.
+        </div>
+
+        <div class="popup-body">
+          <div class="account-section">
+            <h4>Account</h4>
+            <div class="account-options-list">
+              <div
+                class="account-option"
+                onclick="openSettingsModal('editInfoModal')"
+              >
+                <i class="fas fa-user-edit"></i> Edit info
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('aboutMeModal')"
+              >
+                <i class="fas fa-info-circle"></i> Edit about me
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('ignoresModal')"
+              >
+                <i class="fas fa-ban"></i> Manage ignores
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('soundSettingsModal')"
+              >
+                <i class="fas fa-volume-up"></i> Sound settings
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('themeSettingsModal')"
+              >
+                <i class="fas fa-palette"></i> Theme settings
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('privateSettingsModal')"
+              >
+                <i class="fas fa-user-shield"></i> Private settings
+              </div>
+              <div
+                class="account-option"
+                onclick="openSettingsModal('languageLocationModal')"
+              >
+                <i class="fas fa-globe"></i> Language / Location
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Info Modal -->
+      <div class="settings-modal" id="editInfoModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('editInfoModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="ageSelect">Age</label>
+                  <select id="ageSelect" class="form-control">
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                    <option value="23">23</option>
+                    <option value="24">24</option>
+                    <option value="25" selected>25</option>
+                    <option value="26">26</option>
+                    <option value="27">27</option>
+                    <option value="28">28</option>
+                    <option value="29">29</option>
+                    <option value="30">30</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="genderSelect">Gender</label>
+                  <select id="genderSelect" class="form-control">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other" selected>Other</option>
+                  </select>
+                </div>
+              </div>
+              <button class="save-btn" onclick="saveEditInfo()">
+                <i class="fas fa-save"></i> Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About Me Modal -->
+      <div class="settings-modal" id="aboutMeModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('aboutMeModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="aboutMeText">About me</label>
+                <textarea
+                  id="aboutMeText"
+                  class="form-control"
+                  rows="5"
+                ></textarea>
+              </div>
+              <button class="save-btn" onclick="saveAboutMe()">
+                <i class="fas fa-save"></i> Save
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ignores Modal -->
+      <div class="settings-modal" id="ignoresModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('ignoresModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="ignore-list-empty">
+              <img
+                src="https://img.icons8.com/color/96/000000/error--v1.png"
+                alt="Empty"
+              />
+              <p>Your ignore list is empty</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sound Settings Modal -->
+      <div class="settings-modal" id="soundSettingsModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('soundSettingsModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="toggle-option">
+                <span>Chat sounds</span>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="toggle-option">
+                <span>Private sounds</span>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="toggle-option">
+                <span>Notification sounds</span>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="toggle-option">
+                <span>Username sounds</span>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Theme Settings Modal -->
+      <div class="settings-modal" id="themeSettingsModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('themeSettingsModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect" class="form-control">
+                  <option value="default" selected>Default theme</option>
+                  <option value="dark">Dark theme</option>
+                  <option value="light">Light theme</option>
+                  <option value="tamil">Tamil theme</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Private Settings Modal -->
+      <div class="settings-modal" id="privateSettingsModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('privateSettingsModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="privateChatSelect">Private chat</label>
+                <select id="privateChatSelect" class="form-control">
+                  <option value="on" selected>On</option>
+                  <option value="off">Off</option>
+                  <option value="friends">Friends only</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button class="save-btn" onclick="savePrivateSettings()">
+                  <i class="fas fa-save"></i> Save
+                </button>
+                <button
+                  class="cancel-btn"
+                  onclick="closeSettingsModal('privateSettingsModal')"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Language/Location Modal -->
+      <div class="settings-modal" id="languageLocationModal">
+        <div class="settings-modal-content">
+          <div class="settings-modal-header">
+            <button
+              class="close-settings-modal"
+              onclick="closeSettingsModal('languageLocationModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="settings-modal-body">
+            <div class="settings-form">
+              <div class="form-group">
+                <label for="languageSelect">Language</label>
+                <select id="languageSelect" class="form-control">
+                  <option value="english" selected>English</option>
+                  <option value="tamil">Tamil</option>
+                  <option value="hindi">Hindi</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="countrySelect">Country</label>
+                <select id="countrySelect" class="form-control">
+                  <option value="india" selected>India</option>
+                  <option value="sri-lanka">Sri Lanka</option>
+                  <option value="malaysia">Malaysia</option>
+                  <option value="singapore">Singapore</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="timezoneSelect">Timezone</label>
+                <select id="timezoneSelect" class="form-control">
+                  <option value="asia-kolkata" selected>Asia/Kolkata</option>
+                  <option value="asia-colombo">Asia/Colombo</option>
+                  <option value="asia-singapore">Asia/Singapore</option>
+                  <option value="asia-kuala-lumpur">Asia/Kuala_Lumpur</option>
+                </select>
+              </div>
+              <div class="form-actions">
+                <button class="save-btn" onclick="saveLanguageLocation()">
+                  <i class="fas fa-save"></i> Save
+                </button>
+                <button
+                  class="cancel-btn"
+                  onclick="closeSettingsModal('languageLocationModal')"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Name Modal -->
+      <div class="modal" id="changeNameModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Change Display Name</h3>
+            <button class="close-modal" onclick="closeModal('changeNameModal')">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="changeNameForm" onsubmit="return changeName(event)">
+              <label for="newName">New Display Name:</label>
+              <input type="text" id="newName" required />
+              <br /><br />
+              <button type="submit">Save Changes</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Photo Modal -->
+      <div class="modal" id="changePhotoModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Change Profile Photo</h3>
+            <button
+              class="close-modal"
+              onclick="closeModal('changePhotoModal')"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div style="text-align: center; margin-bottom: 20px">
+              <img
+                id="previewImage"
+                src="default-profile.png"
+                alt="Preview"
+                style="
+                  width: 100px;
+                  height: 100px;
+                  border-radius: 50%;
+                  object-fit: cover;
+                "
+              />
+            </div>
+            <form id="changePhotoForm" onsubmit="return false;">
+              <label for="photoInput">Select a new profile photo:</label>
+              <input
+                type="file"
+                id="photoInput"
+                accept="image/*"
+                onchange="previewProfileImage(this)"
+              />
+              <br /><br />
+              <button type="button" onclick="saveProfileImage()">
+                Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        // Check if user is logged in
+        document.addEventListener("DOMContentLoaded", function () {
+          const username = localStorage.getItem("username");
+          if (!username) {
+            window.location.href = "index.html";
+          } else {
+            // Set profile name
+            document.getElementById("profileName").textContent = username;
+
+            // Check for saved profile picture
+            const savedProfilePic = localStorage.getItem("profilePicture");
+            if (savedProfilePic) {
+              // Update all profile images
+              const profileImages =
+                document.querySelectorAll("img#profileImage");
+              profileImages.forEach((img) => {
+                img.src = savedProfilePic;
+              });
+
+              // Also set the preview image
+              const previewImage = document.getElementById("previewImage");
+              if (previewImage) {
+                previewImage.src = savedProfilePic;
+              }
+            }
+
+            // Add current user to users list
+            populateOnlineUsers();
+
+            // Add sample messages
+            addSampleMessages();
+
+            // Update server time
+            updateServerTime();
+            setInterval(updateServerTime, 1000);
+
+            // Populate emoji picker
+            populateEmojiPicker();
+          }
+        });
+
+        // Toggle sidebar
+        function toggleSidebar() {
+          const sidebar = document.getElementById("sidebar");
+          const overlay = document.getElementById("overlay");
+
+          if (sidebar.classList.contains("show")) {
+            sidebar.classList.remove("show");
+            overlay.style.display = "none";
+          } else {
+            sidebar.classList.add("show");
+            overlay.style.display = "block";
+
+            // Close other popups
+            closeProfilePopup();
+            closeProfileDropdown();
+          }
+        }
+
+        // Toggle profile dropdown
+        function toggleProfileDropdown() {
+          const dropdown = document.getElementById("profileDropdown");
+          dropdown.classList.toggle("show");
+        }
+
+        // Toggle online panel
+        function toggleOnlinePanel() {
+          const panel = document.getElementById("onlinePanel");
+          if (panel.classList.contains("show")) {
+            // If panel is currently shown, hide it
+            panel.classList.remove("show");
+          } else {
+            // If panel is currently hidden, show it
+            panel.classList.add("show");
+          }
+        }
+
+        // Open profile popup
+        function openProfilePopup() {
+          const popup = document.getElementById("profilePopup");
+          const overlay = document.getElementById("overlay");
+
+          popup.style.display = "block";
+          overlay.style.display = "block";
+
+          // Close dropdown
+          closeProfileDropdown();
+        }
+
+        // Close profile popup
+        function closeProfilePopup() {
+          const popup = document.getElementById("profilePopup");
+
+          popup.style.display = "none";
+        }
+
+        // Close profile dropdown
+        function closeProfileDropdown() {
+          const dropdown = document.getElementById("profileDropdown");
           dropdown.classList.remove("show");
         }
-      }
-    });
 
-    // FM Play Button
-    document.getElementById("playBtn").addEventListener("click", function () {
-      alert("FM Playing Soon 🎶");
-    });
+        // Close all popups
+        function closeAllPopups() {
+          closeProfilePopup();
+          closeProfileDropdown();
 
-    // Chat functionality
-    const messageInput = document.getElementById("messageInput");
-    const sendBtn = document.getElementById("sendBtn");
-    const chatBox = document.getElementById("chat-box");
+          const sidebar = document.getElementById("sidebar");
+          sidebar.classList.remove("show");
 
-    function sendMessage() {
-      const message = messageInput.value.trim();
-      if (message !== "") {
-        // Emit the message to the server
-        socket.emit("send_message", message);
+          // Close online panel
+          const panel = document.getElementById("onlinePanel");
+          panel.classList.remove("show");
 
-        // Display the message in the chat box
-        const messageDiv = document.createElement("div");
-        messageDiv.className = "message";
-        messageDiv.innerHTML = `<strong>You:</strong> ${message}`;
-        chatBox.appendChild(messageDiv);
+          closeEmojiPicker();
 
-        // Scroll to the bottom of the chat box
-        chatBox.scrollTop = chatBox.scrollHeight;
+          // Close all modals
+          const modals = document.getElementsByClassName("modal");
+          for (let i = 0; i < modals.length; i++) {
+            modals[i].style.display = "none";
+          }
 
-        // Clear the input field
-        messageInput.value = "";
-      }
-    }
+          // Close all settings modals
+          closeAllSettingsModals();
 
-    sendBtn.addEventListener("click", sendMessage);
-    messageInput.addEventListener("keypress", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        sendMessage();
-      }
-    });
+          document.getElementById("overlay").style.display = "none";
+        }
 
-    // Receive messages from the server
-    socket.on("receive_message", function (msg) {
-      const messageDiv = document.createElement("div");
-      messageDiv.className = "message";
-      messageDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.message}`;
-      chatBox.appendChild(messageDiv);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    });
-    const username = document.getElementById("usernameDisplay").textContent; // Dynamically fetch the username
-    const chatMessages = document.getElementById("chatMessages");
+        // Open modal
+        function openModal(modalId) {
+          const modal = document.getElementById(modalId);
+          modal.style.display = "flex";
+        }
 
-   // Display "User has joined the room" message
-document.addEventListener("DOMContentLoaded", () => {
-  const chatBox = document.getElementById("chat-box"); // Ensure this matches your chat box ID
-  const usernameDisplay = document.getElementById("usernameDisplay").textContent; // Fetch the username dynamically
+        // Close modal
+        function closeModal(modalId) {
+          const modal = document.getElementById(modalId);
+          modal.style.display = "none";
+        }
 
-  const joinMessage = document.createElement("div");
-  joinMessage.className = "message system"; // Add a class for system messages
-  joinMessage.textContent = `${usernameDisplay} has joined the room 🦋`;
-  chatBox.appendChild(joinMessage);
+        // Toggle emoji picker
+        function toggleEmojiPicker() {
+          const picker = document.getElementById("emojiPicker");
 
-  // Scroll to the bottom of the chat box
-  chatBox.scrollTop = chatBox.scrollHeight;
-});
-    const onlineUsersList = document.querySelector(".online-users ul:first-child");
-const offlineUsersList = document.querySelector(".online-users ul:last-child");
+          if (picker.style.display === "block") {
+            picker.style.display = "none";
+          } else {
+            picker.style.display = "block";
+          }
+        }
 
-// Function to render users
-function renderUsers(onlineUsers) {
-  onlineUsersList.innerHTML = ""; // Clear the online list
-  offlineUsersList.innerHTML = ""; // Clear the offline list
+        // Close emoji picker
+        function closeEmojiPicker() {
+          const picker = document.getElementById("emojiPicker");
+          picker.style.display = "none";
+        }
 
-  // Example offline users (static for now)
-  const offlineUsers = [
-    { name: "Radha", avatar: "user5.jpg", level: 58 },
-    { name: "Google", avatar: "user6.jpg", level: 23 },
-    { name: "Rocket Raja", avatar: "user7.jpg", level: 40 }
-  ];
+        // Logout
+        function logout() {
+          localStorage.removeItem("username");
+          localStorage.removeItem("gender");
+          localStorage.removeItem("age");
+          localStorage.removeItem("profilePicture");
+          window.location.href = "index.html";
+        }
 
-  // Render online users
-  onlineUsers.forEach((user) => {
-    const userElement = document.createElement("li");
-    userElement.innerHTML = `
-      <img src="${user.avatar}" alt="${user.name}" />
-      <span>${user.name}</span>
-      <span class="level">Lev.${user.level}</span>
-    `;
-    onlineUsersList.appendChild(userElement);
-  });
+        // Send message
+        function sendMessage() {
+          const input = document.getElementById("messageInput");
+          const message = input.value.trim();
 
-  // Render offline users
-  offlineUsers.forEach((user) => {
-    const userElement = document.createElement("li");
-    userElement.innerHTML = `
-      <img src="${user.avatar}" alt="${user.name}" />
-      <span>${user.name}</span>
-      <span class="level">Lev.${user.level}</span>
-    `;
-    offlineUsersList.appendChild(userElement);
-  });
-}
+          if (message) {
+            const chatBox = document.getElementById("chatBox");
+            const username = localStorage.getItem("username");
 
-// Listen for updates from the server
-socket.on("update_users", (data) => {
-  console.log("Online users:", data.online);
-  renderUsers(data.online);
-});
-socket.on("chat_message", (data) => {
-    const chatBox = document.getElementById("chat-box"); // your message area
-    const msgDiv = document.createElement("div");
+            // Create message element
+            const messageElement = document.createElement("div");
+            messageElement.className = "message sent";
 
-    if (data.system) {
-        msgDiv.classList.add("system-message");
-        msgDiv.textContent = data.message;
-    } else {
-        msgDiv.classList.add("chat-message");
-        msgDiv.innerHTML = `<strong>${data.sender}:</strong> ${data.message}`;
-    }
+            // Current time
+            const now = new Date();
+            const timeStr =
+              now.getHours().toString().padStart(2, "0") +
+              ":" +
+              now.getMinutes().toString().padStart(2, "0");
 
-    chatBox.appendChild(msgDiv);
-    chatBox.scrollTop = chatBox.scrollHeight;
-});
-fetch('/api/get-username', {
-    credentials: 'include'
-});
+            // Get profile picture if saved, with fallback to default
+            const profilePic =
+              localStorage.getItem("profilePicture") || "default-profile.png";
 
-  </script>
-</body>
-</html>
+            // Build message HTML with profile photo
+            messageElement.innerHTML = `
+          <div class="profile-photo">
+            <img src="${profilePic}" alt="${username}">
+          </div>
+          <div class="message-content">
+            <strong>${username}</strong>: ${message}
+            <div class="message-time">${timeStr}</div>
+          </div>
+        `;
+
+            // Add message to chat box
+            chatBox.appendChild(messageElement);
+
+            // Clear input
+            input.value = "";
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Simulate response less frequently (only 20% chance)
+            if (
+              Math.random() > 0.8 &&
+              localStorage.getItem("lastAutoResponse") !==
+                new Date().toDateString()
+            ) {
+              // Set a flag to prevent too many auto responses
+              localStorage.setItem(
+                "lastAutoResponse",
+                new Date().toDateString(),
+              );
+
+              setTimeout(
+                () => {
+                  addAutoResponse();
+                },
+                1500 + Math.random() * 3000,
+              );
+            }
+          }
+        }
+
+        // Add an automatic response
+        function addAutoResponse() {
+          const chatBox = document.getElementById("chatBox");
+          const responses = [
+            "Welcome to Tamil Chat! How can I help you today?",
+            "Have you checked out the new Tamil film releases?",
+            "நீங்கள் தமிழ் பேசுகிறீர்களா?", // "Do you speak Tamil?"
+            "What's your favorite Tamil song?",
+            "The Thamizhini FM is playing some great hits today!",
+          ];
+
+          const responderNames = [
+            "TamilAdmin",
+            "ChennaiUser",
+            "TamilFan",
+            "ModeratorTamil",
+          ];
+
+          const randomResponse =
+            responses[Math.floor(Math.random() * responses.length)];
+          const randomName =
+            responderNames[Math.floor(Math.random() * responderNames.length)];
+
+          // Current time
+          const now = new Date();
+          const timeStr =
+            now.getHours().toString().padStart(2, "0") +
+            ":" +
+            now.getMinutes().toString().padStart(2, "0");
+
+          // Create message element
+          const messageElement = document.createElement("div");
+          messageElement.className = "message received";
+
+          // Build message HTML
+          messageElement.innerHTML = `
+        <div class="profile-photo">
+          <img src="default-profile.png" alt="User">
+        </div>
+        <div class="message-content">
+          <strong>${randomName}</strong>: ${randomResponse}
+          <div class="message-time">${timeStr}</div>
+        </div>
+      `;
+
+          // Add message to chat box
+          chatBox.appendChild(messageElement);
+
+          // Scroll to bottom
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Change name
+        function changeName(event) {
+          event.preventDefault();
+          const newName = document.getElementById("newName").value.trim();
+
+          if (newName) {
+            localStorage.setItem("username", newName);
+            document.getElementById("profileName").textContent = newName;
+            populateOnlineUsers();
+            closeModal("changeNameModal");
+          }
+
+          return false;
+        }
+
+        // Update server time
+        function updateServerTime() {
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString();
+          document.getElementById("serverTime").textContent =
+            "Server Time: " + timeStr;
+        }
+
+        // Play/Pause FM
+        document
+          .getElementById("playPauseBtn")
+          .addEventListener("click", function () {
+            const icon = this.querySelector("i");
+
+            if (icon.classList.contains("fa-play")) {
+              icon.classList.remove("fa-play");
+              icon.classList.add("fa-pause");
+            } else {
+              icon.classList.remove("fa-pause");
+              icon.classList.add("fa-play");
+            }
+          });
+
+        // Populate online users list
+        function populateOnlineUsers() {
+          const usersList = document.getElementById("onlineUsersList");
+          const username = localStorage.getItem("username");
+
+          // Clear list
+          usersList.innerHTML = "";
+
+          // Add current user
+          const userItem = document.createElement("li");
+          // Get profile picture if saved
+          const profilePic =
+            localStorage.getItem("profilePicture") || "default-profile.png";
+
+          userItem.innerHTML = `
+        <img src="${profilePic}" alt="User">
+        <span>${username} (You)</span>
+        <span class="level">
+          <span class="status-indicator status-online"></span> Online
+        </span>
+      `;
+
+          usersList.appendChild(userItem);
+
+          // Add some fake users
+          const fakeUsers = [
+            "TamilUser123",
+            "ChennaiLover",
+            "KollywoodFan",
+            "MaduraiNative",
+            "CoimbatoreUser",
+          ];
+          const statuses = ["online", "away", "online", "online", "away"];
+
+          for (let i = 0; i < 3; i++) {
+            const randomIndex = Math.floor(Math.random() * fakeUsers.length);
+            const fakeUserItem = document.createElement("li");
+            const statusClass =
+              statuses[randomIndex] === "online"
+                ? "status-online"
+                : "status-away";
+
+            fakeUserItem.innerHTML = `
+          <img src="default-profile.png" alt="User">
+          <span>${fakeUsers[randomIndex]}</span>
+          <span class="level">
+            <span class="status-indicator ${statusClass}"></span> ${statuses[randomIndex]}
+          </span>
+        `;
+
+            usersList.appendChild(fakeUserItem);
+          }
+
+          // Update count in header
+          const header = document.querySelector(
+            ".online-users h4:nth-child(3)",
+          );
+          header.textContent = `Users Online (${usersList.children.length})`;
+        }
+
+        // Add welcome message
+        function addSampleMessages() {
+          const chatBox = document.getElementById("chatBox");
+
+          // Just add the admin welcome message
+          const welcomeMessage = {
+            username: "TamilAdmin",
+            message: "Welcome to Tamil Chat! Feel free to ask questions.",
+            time: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            type: "received",
+          };
+
+          const messageElement = document.createElement("div");
+          messageElement.className = `message ${welcomeMessage.type}`;
+
+          messageElement.innerHTML = `
+        <div class="profile-photo">
+          <img src="default-profile.png" alt="User">
+        </div>
+        <div class="message-content">
+          <strong>${welcomeMessage.username}</strong>: ${welcomeMessage.message}
+          <div class="message-time">${welcomeMessage.time}</div>
+        </div>
+      `;
+
+          chatBox.appendChild(messageElement);
+
+          // Scroll to bottom
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Populate emoji picker
+        function populateEmojiPicker() {
+          const picker = document.getElementById("emojiPicker");
+          const grid = picker.querySelector(".emoji-grid");
+
+          // Common emojis
+          const emojis = [
+            "😊",
+            "😂",
+            "😍",
+            "👍",
+            "🙏",
+            "❤️",
+            "👏",
+            "🎉",
+            "🔥",
+            "✨",
+            "🥳",
+            "😎",
+            "🤔",
+            "😢",
+            "😡",
+            "🤣",
+            "😁",
+            "👌",
+            "👋",
+            "🙌",
+            "🤩",
+            "😃",
+            "😄",
+            "😅",
+          ];
+
+          // Clear grid
+          grid.innerHTML = "";
+
+          // Add emojis
+          emojis.forEach((emoji) => {
+            const emojiElement = document.createElement("div");
+            emojiElement.className = "emoji";
+            emojiElement.textContent = emoji;
+            emojiElement.addEventListener("click", function () {
+              addEmojiToInput(emoji);
+            });
+
+            grid.appendChild(emojiElement);
+          });
+        }
+
+        // Add emoji to input
+        function addEmojiToInput(emoji) {
+          const input = document.getElementById("messageInput");
+          input.value += emoji;
+          closeEmojiPicker();
+          input.focus();
+        }
+
+        // Update profile picture when clicked directly on profile photo
+        function updateProfilePicture(input) {
+          if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              // Update all profile images with ID profileImage on the page
+              const profileImages =
+                document.querySelectorAll("img#profileImage");
+              profileImages.forEach((img) => {
+                img.src = e.target.result;
+              });
+
+              // Also update all user message profile pictures
+              updateAllUserMessageProfilePictures(e.target.result);
+
+              // Store the image in localStorage (as base64)
+              localStorage.setItem("profilePicture", e.target.result);
+
+              // Show success message
+              alert("Profile picture updated successfully!");
+            };
+
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+
+        // Settings Modal Functions
+        function openSettingsModal(modalId) {
+          const modal = document.getElementById(modalId);
+          if (modal) {
+            modal.style.display = "flex";
+
+            // If it's the edit info modal, populate with saved values
+            if (modalId === "editInfoModal") {
+              const age = localStorage.getItem("age") || "25";
+              const gender = localStorage.getItem("gender") || "other";
+
+              document.getElementById("ageSelect").value = age;
+              document.getElementById("genderSelect").value = gender;
+            }
+
+            // If it's the about me modal, populate with saved value
+            if (modalId === "aboutMeModal") {
+              const aboutMe = localStorage.getItem("aboutMe") || "";
+              document.getElementById("aboutMeText").value = aboutMe;
+            }
+
+            // Close profile popup to avoid multiple popups
+            closeProfilePopup();
+          }
+        }
+
+        function closeSettingsModal(modalId) {
+          const modal = document.getElementById(modalId);
+          if (modal) {
+            modal.style.display = "none";
+          }
+        }
+
+        function closeAllSettingsModals() {
+          const modals = document.querySelectorAll(".settings-modal");
+          modals.forEach((modal) => {
+            modal.style.display = "none";
+          });
+        }
+
+        // Save functions for each settings modal
+        function saveEditInfo() {
+          const age = document.getElementById("ageSelect").value;
+          const gender = document.getElementById("genderSelect").value;
+
+          localStorage.setItem("age", age);
+          localStorage.setItem("gender", gender);
+
+          alert("Profile info updated successfully!");
+          closeSettingsModal("editInfoModal");
+        }
+
+        function saveAboutMe() {
+          const aboutMe = document.getElementById("aboutMeText").value;
+          localStorage.setItem("aboutMe", aboutMe);
+
+          alert("About me updated successfully!");
+          closeSettingsModal("aboutMeModal");
+        }
+
+        function savePrivateSettings() {
+          const privateChatSetting =
+            document.getElementById("privateChatSelect").value;
+          localStorage.setItem("privateChatSetting", privateChatSetting);
+
+          alert("Private settings updated successfully!");
+          closeSettingsModal("privateSettingsModal");
+        }
+
+        function saveLanguageLocation() {
+          const language = document.getElementById("languageSelect").value;
+          const country = document.getElementById("countrySelect").value;
+          const timezone = document.getElementById("timezoneSelect").value;
+
+          localStorage.setItem("language", language);
+          localStorage.setItem("country", country);
+          localStorage.setItem("timezone", timezone);
+
+          alert("Language and location settings updated successfully!");
+          closeSettingsModal("languageLocationModal");
+        }
+
+        // Preview profile image in the change photo modal
+        function previewProfileImage(input) {
+          if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              // Update preview image in modal
+              document.getElementById("previewImage").src = e.target.result;
+            };
+
+            reader.readAsDataURL(input.files[0]);
+          }
+        }
+
+        // Save profile image from modal
+        function saveProfileImage() {
+          // Get the preview image source
+          const previewSrc = document.getElementById("previewImage").src;
+
+          if (previewSrc && previewSrc !== "default-profile.png") {
+            // Update all profile images with ID profileImage
+            const profileImages = document.querySelectorAll("img#profileImage");
+            profileImages.forEach((img) => {
+              img.src = previewSrc;
+            });
+
+            // Also update all user message profile pictures
+            updateAllUserMessageProfilePictures(previewSrc);
+
+            // Store in localStorage
+            localStorage.setItem("profilePicture", previewSrc);
+
+            // Close modal and show success
+            closeModal("changePhotoModal");
+            alert("Profile picture saved successfully!");
+          }
+        }
+
+        // Update all message profile pictures for the current user
+        function updateAllUserMessageProfilePictures(imageSrc) {
+          const username = localStorage.getItem("username");
+          const messages = document.querySelectorAll(".message");
+
+          messages.forEach((msg) => {
+            // Using textContent can sometimes fail if the element has multiple children
+            // So we'll check if this is one of our messages using classList
+            const msgUsername = msg.querySelector("strong")?.textContent;
+            const isSentMessage = msg.classList.contains("sent");
+
+            if (
+              msgUsername === username ||
+              msgUsername === username + " (You)" ||
+              isSentMessage
+            ) {
+              const profileImg = msg.querySelector(".profile-photo img");
+              if (profileImg) {
+                profileImg.src = imageSrc;
+              }
+            }
+          });
+
+          // Also update in the online users list
+          const userListItems = document.querySelectorAll(
+            "#onlineUsersList li",
+          );
+          userListItems.forEach((item) => {
+            const itemUsername = item.querySelector("span")?.textContent;
+            if (
+              itemUsername === username ||
+              itemUsername === username + " (You)"
+            ) {
+              const profileImg = item.querySelector("img");
+              if (profileImg) {
+                profileImg.src = imageSrc;
+              }
+            }
+          });
+        }
+
+        // Close dropdowns when clicking outside
+        window.addEventListener("click", function (event) {
+          const profileDropdown = document.getElementById("profileDropdown");
+          const dropdownBtn = document.querySelector(".dropdown-btn");
+
+          if (
+            !event.target.matches(".dropdown-btn") &&
+            !event.target.matches(".fas.fa-user-circle")
+          ) {
+            profileDropdown.classList.remove("show");
+          }
+        });
+
+        // Add entry message showing username has entered the chatroom
+        function addEntryMessage() {
+          const chatBox = document.getElementById("chatBox");
+          const username = localStorage.getItem("username");
+
+          if (username) {
+            // Create system message element
+            const messageElement = document.createElement("div");
+            messageElement.className = "message system";
+
+            // Build message with butterfly emoji
+            messageElement.innerHTML = `${username} has entered the chatroom 🦋`;
+
+            // Add message to chat box
+            chatBox.appendChild(messageElement);
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+          }
+        }
+
+        // Initialize chat on page load
+        window.onload = function () {
+          // Update server time
+          updateServerTime();
+          setInterval(updateServerTime, 1000);
+
+          // Populate emoji picker
+          populateEmojiPicker();
+
+          // Set profile name from localStorage
+          const username = localStorage.getItem("username");
+          if (username) {
+            document.getElementById("profileName").textContent = username;
+          }
+
+          // Load profile picture if saved
+          const profilePic = localStorage.getItem("profilePicture");
+          if (profilePic) {
+            const profileImages = document.querySelectorAll("img#profileImage");
+            profileImages.forEach((img) => {
+              img.src = profilePic;
+            });
+          }
+
+          // Populate online users list
+          populateOnlineUsers();
+
+          // Add sample messages
+          addSampleMessages();
+
+          // Add welcome entry message showing that user has entered the chatroom
+          addEntryMessage();
+        };
+      </script>
+    </body>
+  </html></DOCTYPE
+>
