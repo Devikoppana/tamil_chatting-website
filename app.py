@@ -19,17 +19,19 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 # MySQL Configuration
-app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST', 'localhost')
-app.config['MYSQL_USER'] = os.getenv('MYSQL_USER', 'root')
-app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD', 'your_password')
-app.config['MYSQL_DB'] = os.getenv('MYSQL_DB', 'tamil_chat')
+# MySQL Configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Devi@123'
+app.config['MYSQL_DB'] = 'tamil_chat'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_PORT'] = 3306
 app.config['MYSQL_PORT'] = int(os.getenv('MYSQL_PORT', 3306))
 
 # Initialize extensions
 mysql = MySQL(app)
-CORS(app, supports_credentials=True, origins=["http://127.0.0.1:5001"])
-socketio = SocketIO(app, cors_allowed_origins="http://127.0.0.1:5001", manage_session=True)
+CORS(app, supports_credentials=True, origins=["*", "http://127.0.0.1:5001", "http://localhost:5001"])
+socketio = SocketIO(app, cors_allowed_origins="*", manage_session=True)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +47,9 @@ def home():
 
 @app.route("/chat.html")
 def chat():
+    # Only allow logged-in users
+    if 'user_id' not in session:
+        return send_from_directory("static", "main.html")
     return send_from_directory("static", "chat.html")
 
 @app.route("/static/<path:filename>")
@@ -103,7 +108,7 @@ def login():
 
         # Fetch user from the database
         cur = mysql.connection.cursor()
-        cur.execute("SELECT id, name, password, avatar FROM users WHERE name = %s", (username,))
+        cur.execute("SELECT id, name, password FROM users WHERE name = %s", (username,))
         user = cur.fetchone()
         cur.close()
 
@@ -120,13 +125,17 @@ def login():
         # Set session
         session['user_id'] = user['id']
         session['user_name'] = user['name']
-        session['avatar'] = user['avatar'] or 'default-profile.png'
+        # session['avatar'] = user['avatar'] or 'default-profile.png'
+        session['avatar'] = 'default-profile.png'
         logger.info(f"User logged in successfully: {username}")
 
         return jsonify({"message": "Login successful!", "user": user['name'], "avatar": session['avatar']}), 200
 
     except Exception as e:
         logger.error(f"Error during login: {type(e).__name__}: {e}")
+        print(f"******************************")
+        print(f"Error during login: {type(e).__name__}: {e}")
+        print(f"******************************")
         return jsonify({"error": "An error occurred during login"}), 500
 # ===================== 👤 Get Logged-in User =====================
 @app.route('/get_user', methods=['GET'])
@@ -170,7 +179,7 @@ def upload_profile_picture():
             session['avatar'] = file_url
             if session['user_id'] in online_users:
                 online_users[session['user_id']]['avatar'] = file_url
-            socketio.emit('update_users', {"online": list(online_users.values())}, broadcast=True)
+            socketio.emit('update_users', {"online": list(online_users.values())})
             logger.info(f"Profile picture uploaded for user: {session['user_name']}")
             return jsonify({"success": True, "url": file_url}), 200
         except Exception as e:
@@ -198,7 +207,7 @@ def update_status():
         session['status'] = status
         if session['user_id'] in online_users:
             online_users[session['user_id']]['status'] = status
-        socketio.emit('update_users', {"online": list(online_users.values())}, broadcast=True)
+        socketio.emit('update_users', {"online": list(online_users.values())})
         logger.info(f"Status updated to {status} for user: {session['user_name']}")
         return jsonify({"message": f"Status updated to {status}"}), 200
     except Exception as e:
@@ -308,12 +317,17 @@ def update_settings():
 online_users = {}
 
 @socketio.on('connect')
-def handle_connect():
+def handle_connect(auth=None):
+    # TEMPORARY BYPASS FOR DEBUGGING: Accept all connections
     user_id = session.get('user_id')
+    print("#################################")
+    print(dict(session))
+    print("#################################")
     if not user_id:
         logger.warning("SocketIO connect rejected: Not logged in")
         return False  # Disconnect unauthenticated users
 
+    # user_id = session.get('user_id', 'guest_' + str(request.sid))
     user_info = {
         "id": user_id,
         "name": session.get('user_name', 'Guest'),
@@ -327,7 +341,7 @@ def handle_connect():
     logger.info(f"{user_info['name']} connected to SocketIO")
 
     # Notify all users
-    socketio.emit('update_users', {"online": list(online_users.values())}, broadcast=True)
+    socketio.emit('update_users', {"online": list(online_users.values())})
     socketio.emit('user_joined', {"user": user_info}, room="public")
 
 @socketio.on('disconnect')
@@ -338,10 +352,11 @@ def handle_disconnect():
         del online_users[user_id]
         logger.info(f"{user_name} disconnected from SocketIO")
         socketio.emit('user_left', {"user": online_users[user_id]}, room="public")
-        socketio.emit('update_users', {"online": list(online_users.values())}, broadcast=True)
+        socketio.emit('update_users', {"online": list(online_users.values())})
 
 @socketio.on('join_room')
 def handle_join_room(room):
+    print(f"User joined room: {room}")
     user_name = session.get('user_name', 'Guest')
     join_room(room)
     emit('chat_message', {
@@ -354,6 +369,7 @@ def handle_join_room(room):
 
 @socketio.on('chat_message')
 def handle_chat(data):
+    print("Received chat_message:", data)
     sender = session.get('user_name', 'Guest')
     room = data.get('room', 'general')
     message = data.get('message')
@@ -399,4 +415,4 @@ def handle_error(error):
 
 # ===================== 🔁 Run the App =====================
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host="127.0.0.1", port=5001)
+    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
